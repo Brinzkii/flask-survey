@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, flash, redirect
+from flask import Flask, request, render_template, flash, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import Question, satisfaction_survey
 
@@ -22,12 +22,20 @@ def show_start():
     return render_template("start.html", title=title, rules=rules)
 
 
+@app.route("/create_session", methods=["POST"])
+def create_session():
+    session["responses"] = []
+    return redirect("/questions/0")
+
+
 @app.route("/questions/<num>")
 def show_question(num):
     q_num = int(num)
 
     if q_num > len(satisfaction_survey.questions) - 1:
-        print(responses)
+        data = session["responses"]
+        data.append(responses)
+        session["responses"] = data
         return redirect("/thanks")
     elif q_num != len(responses):
         flash("Please complete the questions in order!")
